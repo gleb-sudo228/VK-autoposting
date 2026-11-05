@@ -1,145 +1,25 @@
-
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>VK Autoposting — авторизация</title>
-
-    <!-- VK Bridge -->
-    <script src="https://unpkg.com/@vkontakte/vk-bridge@2.15.0/dist/browser.min.js"></script>
-    <script src="app.js" defer></script>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 24px;
-            font-family: Arial, sans-serif;
-            background: #f2f3f5;
-            color: #222;
-        }
-
-        .container {
-            max-width: 520px;
-            margin: 40px auto;
-            padding: 28px;
-            background: white;
-            border-radius: 14px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-        }
-
-        h1 {
-            font-size: 24px;
-            margin-top: 0;
-        }
-
-        p {
-            line-height: 1.5;
-            color: #555;
-        }
-
-        label {
-            display: block;
-            margin-top: 22px;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            border: 1px solid #ccd0d5;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        button {
-            width: 100%;
-            margin-top: 18px;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            background: #2787f5;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        #status {
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 8px;
-            background: #f2f3f5;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
-
-        .note {
-            margin-top: 20px;
-            font-size: 13px;
-            color: #777;
-        }
-    </style>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>VK Authorization</title>
 </head>
-
 <body>
+    <h2>Авторизация VK</h2>
 
-    <div class="container">
+    <button id="authorize">
+        Авторизоваться
+    </button>
 
-        <h1>VK Autoposting</h1>
+    <p id="status">Ожидание авторизации</p>
 
-        <p>
-            Авторизация для локального бота отложенной публикации.
-        </p>
+    <button id="download" hidden>
+        Скачать результат TXT
+    </button>
 
-        <p>
-            Сначала запусти программу main.py на своём Mac.
-            Она покажет одноразовый код. Введи его в поле ниже.
-        </p>
-
-        <label for="pairingCode">
-            Одноразовый код из Terminal
-        </label>
-
-        <input
-            id="pairingCode"
-            type="password"
-            autocomplete="off"
-            placeholder="Вставь одноразовый код"
-        >
-
-        <button id="authButton" type="button">
-            Авторизоваться и передать токен
-        </button>
-
-        <div id="status">
-            Ожидание запуска локального бота.
-        </div>
-
-        <p class="note">
-            Токен не отображается на странице и не сохраняется
-            в GitHub. Передача выполняется непосредственно на
-            локальный сервер твоего Mac.
-        </p>
-
-    </div>
-
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+    <script src="app.js"></script>
 </body>
-
 </html>
