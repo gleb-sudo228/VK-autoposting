@@ -116,7 +116,7 @@ authorizeButton.addEventListener("click", async () => {
 
         const result = await response.json();
 
-        if (!result.success) {
+        if (!result.ok) {
             throw new Error(
                 result.message || "Сервер не подтвердил авторизацию."
             );
