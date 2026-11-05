@@ -4,22 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-    <title>VK Authorization</title>
+
+    <title>VK Autoposting Authorization</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 24px;
+            max-width: 480px;
+            margin: auto;
+        }
+
+        input, button {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 13px;
+            margin-top: 12px;
+            font-size: 16px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #status {
+            margin-top: 20px;
+            line-height: 1.5;
+        }
+    </style>
 </head>
+
 <body>
-    <h2>Авторизация VK</h2>
+
+    <h2>VK AUTOPOSTING</h2>
+
+    <p>Авторизация для отложенной публикации записей VK</p>
+
+    <label for="pairingCode">
+        Введи одноразовый код из Python-бота:
+    </label>
+
+    <input
+        id="pairingCode"
+        type="text"
+        placeholder="Одноразовый код"
+        autocomplete="off"
+        autocapitalize="off"
+    >
 
     <button id="authorize">
-        Авторизоваться
+        Получить токен и авторизоваться
     </button>
 
-    <p id="status">Ожидание авторизации</p>
-
-    <button id="download" hidden>
-        Скачать результат TXT
-    </button>
+    <p id="status">
+        Ожидание авторизации
+    </p>
 
     <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
     <script src="app.js"></script>
+
 </body>
 </html>
