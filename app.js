@@ -1,53 +1,144 @@
 
-const APP_ID = 54746009;
+const VK_APP_ID = 54746009;
 
-const status = document.getElementById("status");
-const authorize = document.getElementById("authorize");
-const download = document.getElementById("download");
+const LOCAL_RECEIVER_URL =
+    "http://127.0.0.1:8765/receive-token";
 
-let resultText = "";
 
-vkBridge.send("VKWebAppInit");
+const button = document.getElementById("authButton");
+const statusBox = document.getElementById("status");
+const codeInput = document.getElementById("pairingCode");
 
-authorize.addEventListener("click", async () => {
+
+function setStatus(message) {
+    statusBox.textContent = message;
+}
+
+
+function getGrantedScopes(scopeValue) {
+    if (Array.isArray(scopeValue)) {
+        return scopeValue.map(item => String(item).trim());
+    }
+
+    if (typeof scopeValue === "string") {
+        return scopeValue
+            .split(",")
+            .map(item => item.trim())
+            .filter(Boolean);
+    }
+
+    return [];
+}
+
+
+async function authorize() {
+    const pairingCode = codeInput.value.trim();
+
+    if (!pairingCode) {
+        setStatus("Сначала введи одноразовый код из Terminal.");
+        return;
+    }
+
+    if (!window.vkBridge) {
+        setStatus(
+            "VK Bridge не обнаружен. Открой Mini App внутри VK. " +
+            "Если авторизация недоступна, используй ввод токена " +
+            "через Terminal."
+        );
+        return;
+    }
+
+    button.disabled = true;
+    setStatus("Запрашиваю разрешения VK...");
+
     try {
-        status.textContent = "Ожидание подтверждения VK...";
+        // Инициализация VK Bridge.
+        await window.vkBridge.send("VKWebAppInit", {});
 
-        const user = await vkBridge.send(
-            "VKWebAppGetUserInfo"
+        // Запрашиваем пользовательский токен и два необходимых права.
+        const authResult = await window.vkBridge.send(
+            "VKWebAppGetAuthToken",
+            {
+                app_id: VK_APP_ID,
+                scope: "wall,photos"
+            }
         );
 
-        resultText =
-            "VK Mini App authorization\n" +
-            "Application ID: " + APP_ID + "\n" +
-            "User ID: " + user.id + "\n" +
-            "Name: " + user.first_name + " " +
-            user.last_name + "\n" +
-            "Status: Authorized";
+        const accessToken = authResult.access_token;
 
-        status.textContent =
-            "Авторизация подтверждена.";
+        const scopes = getGrantedScopes(authResult.scope);
 
-        download.hidden = false;
+        if (!accessToken) {
+            throw new Error("VK не передал пользовательский токен.");
+        }
+
+        const requiredScopes = ["wall", "photos"];
+
+        const missingScopes = requiredScopes.filter(
+            scope => !scopes.includes(scope)
+        );
+
+        if (missingScopes.length > 0) {
+            throw new Error(
+                "Не получены необходимые права: " +
+                missingScopes.join(", ") +
+                ". Разреши права wall и photos при авторизации."
+            );
+        }
+
+        setStatus("Разрешения получены. Передаю токен локальному боту...");
+
+        // Передача происходит на localhost, а не на внешний сервер.
+        const response = await fetch(
+            LOCAL_RECEIVER_URL,
+            {
+                method: "POST",
+                mode: "cors",
+                credentials: "omit",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: pairingCode,
+                    access_token: accessToken,
+                    scope: scopes
+                })
+            }
+        );
+
+        let result;
+
+        try {
+            result = await response.json();
+        } catch {
+            throw new Error(
+                "Локальная программа вернула некорректный ответ."
+            );
+        }
+
+        if (!response.ok || !result.ok) {
+            throw new Error(
+                result.message || "Локальная авторизация не удалась."
+            );
+        }
+
+        // Не выводим токен, не сохраняем его в браузере.
+        codeInput.value = "";
+
+        setStatus(
+            "Авторизация успешно передана локальному боту. " +
+            "Вернись в Terminal."
+        );
 
     } catch (error) {
-        status.textContent =
-            "Ошибка: " + error.message;
+        setStatus(
+            "Ошибка авторизации:\n" + error.message
+        );
+
+    } finally {
+        button.disabled = false;
     }
-});
+}
 
-download.addEventListener("click", () => {
-    const blob = new Blob(
-        [resultText],
-        { type: "text/plain;charset=utf-8" }
-    );
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = "vk_authorization.txt";
-    link.click();
-
-    URL.revokeObjectURL(url);
-});
+button.addEventListener("click", authorize);
